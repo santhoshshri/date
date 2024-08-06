@@ -13,18 +13,32 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up SSH
+      - name: Set up SSH for Server 1
         uses: webfactory/ssh-agent@v0.5.0
         with:
           ssh-private-key: ${{ secrets.PRIVATE }}
-        
-      - name: Add SSH keyscan
+
+      - name: Add SSH keyscan for Server 1
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Create backup directory on remote server
+      - name: Create backup directory on Server 1
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "cp -R /var/www/test/ /opt/testing/backup/test-\$(date +%Y-%m-%d)"
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "rm -rf /opt/testing/backup/test-\$(date -d 'yesterday' +%Y-%m-%d)"
-        
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "cp -R /var/www/testing/ /opt/testing/backup/testing-\$(date +%Y-%m-%d)"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "rm -rf /opt/testing/backup/testing-\$(date -d 'yesterday' +%Y-%m-%d)"
+
+      - name: Set up SSH for Server 2
+        uses: webfactory/ssh-agent@v0.5.0
+        with:
+          ssh-private-key: ${{ secrets.PRIVATE2 }}
+
+      - name: Add SSH keyscan for Server 2
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.HOST2 }} >> ~/.ssh/known_hosts
+
+      - name: Create backup directory on Server 2
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST2 }} "cp -R /var/www/testing/ /opt/testing/backup/testing-\$(date +%Y-%m-%d)"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST2 }} "rm -rf /opt/testing/backup/testing-\$(date -d 'yesterday' +%Y-%m-%d)"

@@ -26,19 +26,9 @@ jobs:
       - name: Set up date variables
         id: date
         run: |
-          echo "BACKUP_DATE=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
-          echo "BACKUP_DIR=test-$BACKUP_DATE" >> $GITHUB_ENV
           echo "OLD_BACKUP_DATE=$(date -d 'yesterday' +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "OLD_BACKUP_DIR=test-$OLD_BACKUP_DATE" >> $GITHUB_ENV
 
       - name: Create backup directory on remote server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "mkdir -p /opt/testing/backup/${{ env.BACKUP_DIR }}"
-
-      - name: Perform backup on remote server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "rsync -av /var/www/test/ /opt/testing/backup/${{ env.BACKUP_DIR }}/"
-
-      - name: Remove previous day's backup on remote server
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "if [ -d /opt/testing/backup/${{ env.OLD_BACKUP_DIR }} ]; then rm -rf /opt/testing/backup/${{ env.OLD_BACKUP_DIR }}; fi"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "mkdir -p /opt/testing/backup/test-\$(date +%Y-%m-%d)"

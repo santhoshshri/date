@@ -22,13 +22,9 @@ jobs:
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
-         
-      - name: Set up date variables
-        id: date
-        run: |
-          echo "OLD_BACKUP_DATE=$(date -d 'yesterday' +'%Y-%m-%d')" >> $GITHUB_ENV
-          echo "OLD_BACKUP_DIR=test-$OLD_BACKUP_DATE" >> $GITHUB_ENV
 
       - name: Create backup directory on remote server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "mkdir -p /opt/testing/backup/test-\$(date +%Y-%m-%d)"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "cp -R /var/www/test/ /opt/testing/backup/test-\$(date +%Y-%m-%d)"
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "rm -rf /opt/testing/backup/test-\$(date -d 'yesterday' +%Y-%m-%d)"
+        

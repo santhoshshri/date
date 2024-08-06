@@ -31,23 +31,14 @@ jobs:
           echo "OLD_BACKUP_DATE=$(date -d 'yesterday' +'%Y-%m-%d')" >> $GITHUB_ENV
           echo "OLD_BACKUP_DIR=test-$OLD_BACKUP_DATE" >> $GITHUB_ENV
 
-      - name: Perform backup and cleanup on remote server
+      - name: Create backup directory on remote server
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.REMOTE_HOST }} << 'EOF'
-            BACKUP_DATE=$(date +'%Y-%m-%d')
-            BACKUP_DIR="test-$BACKUP_DATE"
-            OLD_BACKUP_DATE=$(date -d 'yesterday' +'%Y-%m-%d')
-            OLD_BACKUP_DIR="test-$OLD_BACKUP_DATE"
-            
-            # Create the backup directory
-            mkdir -p /opt/testing/backup/$BACKUP_DIR
-            
-            # Perform the backup
-            rsync -av /var/www/test/ /opt/testing/backup/$BACKUP_DIR/
-            
-            # Remove previous day's backup if it exists
-            if [ -d "/opt/testing/backup/$OLD_BACKUP_DIR" ]; then
-              rm -rf /opt/testing/backup/$OLD_BACKUP_DIR
-            fi
-  
-          EOF
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "mkdir -p /opt/testing/backup/${{ env.BACKUP_DIR }}"
+
+      - name: Perform backup on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "rsync -av /var/www/test/ /opt/testing/backup/${{ env.BACKUP_DIR }}/"
+
+      - name: Remove previous day's backup on remote server
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.HOST }} "if [ -d /opt/testing/backup/${{ env.OLD_BACKUP_DIR }} ]; then rm -rf /opt/testing/backup/${{ env.OLD_BACKUP_DIR }}; fi"
